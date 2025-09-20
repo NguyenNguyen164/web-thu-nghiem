@@ -15,6 +15,7 @@ import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
+import SearchPage from './pages/SearchPage';
 import NotFound from './pages/NotFound';
 import { ScrollToTop, ScrollToTopButton } from './components/ScrollToTop';
 
@@ -51,6 +52,7 @@ const Layout = ({ children, showScrollButton = false }: { children: ReactNode, s
     <TopBar />
     <Header />
     <main style={{ flex: 1, position: 'relative' }}>
+      {children}
       {children}
       {showScrollButton && <ScrollToTopButton />}
     </main>
@@ -92,6 +94,10 @@ const router = createBrowserRouter([
   {
     path: '/dat-hang-thanh-cong',
     element: <Layout><OrderSuccessPage /></Layout>,
+  },
+  {
+    path: '/tim-kiem',
+    element: <Layout showScrollButton={true}><SearchPage /></Layout>,
   },
   {
     path: '*',

@@ -12,11 +12,13 @@ import {
   Input,
   InputRightElement,
   Kbd,
-  useDisclosure
+  useDisclosure,
+  useBreakpointValue,
+  Button
 } from '@chakra-ui/react';
-import { FiShoppingCart, FiMenu, FiSearch } from 'react-icons/fi';
+import { FiShoppingCart, FiMenu, FiSearch, FiX } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { KeyboardEvent } from 'react';
 
 const Header = () => {
@@ -25,13 +27,33 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const cartItemsCount = cart.lines.reduce((total, item) => total + item.qty, 0);
+  const isMobile = useBreakpointValue({ base: true, md: false });
 
-  const handleSearch = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
+  // Handle search submission
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (searchQuery.trim()) {
       navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+      if (isMobile) {
+        setSearchQuery('');
+      }
     }
   };
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // Auto-focus search input on mobile when search is opened
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      const searchInput = document.getElementById('search-input');
+      searchInput?.focus();
+    }
+  }, [isOpen, isMobile]);
 
   return (
     <Box as="header" bg="white" boxShadow="sm" position="sticky" top={0} zIndex={10}>
@@ -48,38 +70,109 @@ const Header = () => {
             />
           </RouterLink>
 
-          {/* Search Bar */}
-          <Box flex="1" maxW="2xl" mx={{ base: 4, md: 8 }}>
-            <InputGroup>
-              <InputLeftElement pointerEvents="none">
-                <FiSearch color="gray.400" />
-              </InputLeftElement>
-              <Input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                bg="white"
-                borderColor="gray.200"
-                _hover={{ borderColor: 'gray.300' }}
-                _focus={{
-                  borderColor: 'accent1.500',
-                  boxShadow: '0 0 0 1px var(--chakra-colors-accent1-500)'
-                }}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-                pr="4.5rem"
-                size="lg"
-              />
-              <InputRightElement width="auto" mr={2} pointerEvents="none">
-                <Kbd>Enter</Kbd>
-              </InputRightElement>
-            </InputGroup>
+          {/* Search Bar - Desktop */}
+          <Box 
+            flex="1" 
+            maxW="2xl" 
+            mx={4} 
+            display={{ base: 'none', md: 'block' }}
+          >
+            <form onSubmit={handleSearch}>
+              <InputGroup>
+                <InputLeftElement pointerEvents="none">
+                  <FiSearch color="gray.400" />
+                </InputLeftElement>
+                <Input
+                  placeholder="Tìm kiếm sản phẩm..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  bg="white"
+                  borderColor="gray.200"
+                  _hover={{ borderColor: 'gray.300' }}
+                  _focus={{
+                    borderColor: 'blue.500',
+                    boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
+                  }}
+                  pr="4.5rem"
+                />
+                <InputRightElement width="auto" mr={1}>
+                  <Kbd>Enter</Kbd>
+                </InputRightElement>
+              </InputGroup>
+            </form>
           </Box>
+
+          {/* Mobile Search Button */}
+          <IconButton
+            display={{ base: 'flex', md: 'none' }}
+            aria-label="Tìm kiếm"
+            icon={<FiSearch />}
+            onClick={onToggle}
+            variant="ghost"
+            mr={2}
+          />
 
           {/* Right side icons */}
           <HStack spacing={4}>
-              {/* Cart Button */}
-              <Box position="relative">
+            {/* Mobile Search Overlay */}
+            {isOpen && isMobile && (
+              <Box
+                position="fixed"
+                top="0"
+                left="0"
+                right="0"
+                bg="white"
+                p={4}
+                zIndex="overlay"
+                boxShadow="md"
+                display="flex"
+                alignItems="center"
+              >
+                <form onSubmit={handleSearch} style={{ flex: 1 }}>
+                  <InputGroup>
+                    <InputLeftElement pointerEvents="none">
+                      <FiSearch color="gray.400" />
+                    </InputLeftElement>
+                    <Input
+                      id="search-input"
+                      placeholder="Tìm kiếm sản phẩm..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      bg="white"
+                      borderColor="gray.200"
+                      _hover={{ borderColor: 'gray.300' }}
+                      _focus={{
+                        borderColor: 'blue.500',
+                        boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
+                      }}
+                      pr="4.5rem"
+                    />
+                    <InputRightElement width="auto" mr={1}>
+                      <Button 
+                        size="sm" 
+                        colorScheme="blue" 
+                        h="1.75rem" 
+                        onClick={handleSearch}
+                      >
+                        Tìm
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </form>
+                <IconButton
+                  aria-label="Đóng tìm kiếm"
+                  icon={<FiX />}
+                  onClick={onToggle}
+                  ml={2}
+                  variant="ghost"
+                />
+              </Box>
+            )}
+
+            {/* Cart Button */}
+            <Box position="relative">
                 <IconButton
                   as={RouterLink}
                   to="/gio-hang"
