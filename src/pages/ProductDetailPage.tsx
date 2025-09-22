@@ -4,21 +4,7 @@ import { useCart } from '../context/CartContext';
 import { FiShoppingCart, FiArrowLeft, FiTruck, FiShield, FiTag } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import ProductGallery from '../components/ProductGallery';
-
-type Product = {
-  id: string;
-  title: string;
-  price_AUD: number;
-  compare_at_price_AUD?: number;
-  images: {
-    main: string;
-    thumb: string;
-    placeholder: string;
-  };
-  short_description?: string;
-  attributes?: Record<string, any>;
-  category_ids?: string[];
-};
+import type { Product } from '../types/product';
 
 const ProductDetailPage = () => {
   const { product } = useLoaderData() as { product: Product };

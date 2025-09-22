@@ -6,6 +6,20 @@ export interface ProductAttributes {
     depth?: number;
     diameter?: number;
   };
+  room?: string;
+  furniture_type?: string;
+  slats_material?: string;
+  finish?: string | null;
+  color?: string | null;
+  style?: string | null;
+  brand?: string;
+  origin?: string;
+  customizable?: boolean;
+  lead_time?: string;
+  width_mm?: number;
+  length_mm?: number;
+  height_mm?: number | null;
+  length_bucket?: string;
   [key: string]: any; // For other dynamic attributes
 }
 

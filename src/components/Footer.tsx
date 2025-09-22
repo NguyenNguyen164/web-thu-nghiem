@@ -162,11 +162,10 @@ const Footer = () => {
             </Heading>
             <VStack align="flex-start" spacing={3}>
               <FooterLink to="/">Trang chủ</FooterLink>
-              <FooterLink to="/about">Về chúng tôi</FooterLink>
-              <FooterLink to="/products">Sản phẩm</FooterLink>
-              <FooterLink to="/promotions">Khuyến mãi</FooterLink>
-              <FooterLink to="/blog">Tin tức</FooterLink>
-              <FooterLink to="/contact">Liên hệ</FooterLink>
+              <FooterLink to="/#about">Về chúng tôi</FooterLink>
+              <FooterLink to="/#products">Sản phẩm</FooterLink>
+              <FooterLink to="/#promotions">Khuyến mãi</FooterLink>
+              <FooterLink to="/#contact">Liên hệ</FooterLink>
             </VStack>
           </GridItem>
 
@@ -187,12 +186,10 @@ const Footer = () => {
               Danh mục
             </Heading>
             <VStack align="flex-start" spacing={3}>
-              <FooterLink to="/products/sofa">Sofa gỗ</FooterLink>
-              <FooterLink to="/products/table">Bàn gỗ</FooterLink>
-              <FooterLink to="/products/chair">Ghế gỗ</FooterLink>
-              <FooterLink to="/products/bed">Giường ngủ</FooterLink>
-              <FooterLink to="/products/cabinet">Tủ gỗ</FooterLink>
-              <FooterLink to="/products/decoration">Đồ trang trí</FooterLink>
+              <FooterLink to="/danh-muc/sofa-ghe">Sofa & Ghế</FooterLink>
+              <FooterLink to="/danh-muc/ban-an">Bàn Ăn</FooterLink>
+              <FooterLink to="/danh-muc/giuong-ngu">Giường Ngủ</FooterLink>
+              <FooterLink to="/danh-muc/tu-quan-ao">Tủ Quần Áo</FooterLink>
             </VStack>
           </GridItem>
 

@@ -1,4 +1,4 @@
-import { Box, Container, SimpleGrid, Flex, Text, Heading, Icon, useColorModeValue } from '@chakra-ui/react';
+import { Box, Container, SimpleGrid, Text, Heading, Icon, useColorModeValue, HStack } from '@chakra-ui/react';
 import { FiTruck, FiShield, FiAward, FiHeart } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
@@ -26,54 +26,58 @@ const features = [
 ];
 
 const FeaturesSection = () => {
-  const bgColor = useColorModeValue('gray.50', 'gray.800');
-  const cardBg = useColorModeValue('white', 'gray.700');
+  const bgColor = useColorModeValue('white', 'gray.800');
   
   return (
-    <Box py={6} bg={bgColor}>
+    <Box py={8} bgGradient="linear(to-b, brand.50, brand.100)">
       <Container maxW="container.xl">
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={4}>
+        <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3}>
           {features.map((feature, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
             >
-              <Flex
-                p={3}
-                bg={cardBg}
+              <Box
+                p={4}
+                bg={bgColor}
                 borderRadius="lg"
-                boxShadow="sm"
-                alignItems="center"
-                transition="all 0.3s"
+                borderWidth="1px"
+                borderColor="brand.200"
+                textAlign="center"
+                h="100%"
+                minH="120px"
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                transition="all 0.2s"
                 _hover={{
-                  transform: 'translateY(-3px)',
-                  boxShadow: 'lg',
-                  '.feature-icon': {
-                    bg: 'accent1.100',
-                    transform: 'scale(1.1)'
-                  }
+                  transform: 'translateY(-2px)',
+                  boxShadow: 'sm',
+                  borderColor: 'brand.300'
                 }}
               >
-                <Box
-                  className="feature-icon"
-                  p={2}
-                  bg="accent1.50"
-                  color="accent1.600"
-                  borderRadius="full"
-                  transition="all 0.3s"
-                  flexShrink={0}
-                  mr={3}
-                >
-                  <Icon as={feature.icon} boxSize={5} color="accent1.500" />
-                </Box>
-                <Box>
-                  <Heading as="h3" size="sm" mb={1} textAlign="left">{feature.title}</Heading>
-                  <Text color="gray.600" fontSize="xs" textAlign="left">{feature.description}</Text>
-                </Box>
-              </Flex>
+                <HStack spacing={2} align="center" justify="center" mb={1}>
+                  <Box 
+                    p={1.5}
+                    bg="brand.50" 
+                    borderRadius="full" 
+                    borderWidth="1px"
+                    borderColor="brand.200"
+                    display="inline-flex"
+                  >
+                    <Icon as={feature.icon} w={4} h={4} color="brand.600" />
+                  </Box>
+                  <Heading as="h3" size="xs" color="brand.700" fontWeight="bold" whiteSpace="nowrap">
+                    {feature.title}
+                  </Heading>
+                </HStack>
+                <Text color="brand.600" fontSize="xs" lineHeight="shorter">
+                  {feature.description}
+                </Text>
+              </Box>
             </motion.div>
           ))}
         </SimpleGrid>

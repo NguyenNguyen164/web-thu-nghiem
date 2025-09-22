@@ -1,4 +1,4 @@
-import { ChakraProvider } from '@chakra-ui/react';
+import { ChakraProvider, Box, Container } from '@chakra-ui/react';
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './context/CartContext';
@@ -9,7 +9,7 @@ import type { ReactNode } from 'react';
 import Header from './components/Header';
 import TopBar from './components/TopBar';
 import Footer from './components/Footer';
-import ProductDetailPage from './pages/ProductDetailPage';
+import ProductDetail from './pages/ProductDetail';
 import CategoryPage from './pages/CategoryPage';
 import HomePage from './pages/HomePage';
 import CartPage from './pages/CartPage';
@@ -47,17 +47,18 @@ const queryClient = new QueryClient();
 
 // Layout component that includes header and footer
 const Layout = ({ children, showScrollButton = false }: { children: ReactNode, showScrollButton?: boolean }) => (
-  <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+  <Box width="100%" maxW="1920px" mx="auto" flex={1} display="flex" flexDirection="column" bg="brand.50">
     <ScrollToTop />
     <TopBar />
     <Header />
-    <main style={{ flex: 1, position: 'relative' }}>
-      {children}
-      {children}
-      {showScrollButton && <ScrollToTopButton />}
-    </main>
+    <Box flex={1} position="relative" width="100%" px={{ base: 4, md: 6, lg: 8 }}>
+      <main style={{ width: '100%' }}>
+        {children}
+        {showScrollButton && <ScrollToTopButton />}
+      </main>
+    </Box>
     <Footer />
-  </div>
+  </Box>
 );
 
 // Create the router configuration with v7 future flags
@@ -69,14 +70,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/san-pham/:id',
-    element: <Layout showScrollButton={true}><ProductDetailPage /></Layout>,
-    loader: async ({ params }) => {
-      const product = typedProductData.items.find(p => p.id === params.id);
-      if (!product) {
-        throw new Response('Not Found', { status: 404 });
-      }
-      return { product };
-    },
+    element: <Layout><ProductDetail /></Layout>,
     errorElement: <Layout><NotFound /></Layout>,
   },
   {

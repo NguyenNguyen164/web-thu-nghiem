@@ -1,11 +1,21 @@
-import { Box, Container, Flex, Heading, Text, Button, Image, VStack, HStack, useBreakpointValue } from '@chakra-ui/react';
+import { Box, Container, Flex, Heading, Text, Button, Image, VStack, HStack } from '@chakra-ui/react';
 import { FiChevronRight } from 'react-icons/fi';
 
 const AboutSection = () => {
-  const isMobile = useBreakpointValue({ base: true, md: false });
-  
   return (
-    <Box py={20} bg="white">
+    <Box py={20} bgGradient="linear(to-b, brand.50, brand.100)" position="relative" overflow="hidden">
+      {/* Decorative elements */}
+      <Box 
+        position="absolute" 
+        top="-10%" 
+        right="-5%" 
+        w="300px" 
+        h="300px" 
+        bg="brand.200" 
+        opacity={0.1} 
+        borderRadius="full"
+        filter="blur(40px)"
+      />
       <Container maxW="container.xl">
         <Flex 
           direction={{ base: 'column', md: 'row' }} 
@@ -23,7 +33,7 @@ const AboutSection = () => {
               position="absolute"
               bottom={-6}
               right={-6}
-              bg="accent1.500"
+              bg="brand.600"
               color="white"
               p={4}
               borderRadius="full"
@@ -37,41 +47,46 @@ const AboutSection = () => {
           </Box>
           
           <Box flex={1}>
-            <Text color="accent1.500" fontWeight="bold" letterSpacing="wider" mb={4}>
-              VỀ CHÚNG TÔI
-            </Text>
-            <Heading as="h2" size="xl" mb={6} lineHeight="tall">
-              Chất lượng tạo nên thương hiệu
-            </Heading>
-            <Text color="gray.600" mb={6} lineHeight="tall">
-              Với hơn 10 năm kinh nghiệm trong lĩnh vực nội thất, chúng tôi tự hào mang đến những sản phẩm chất lượng cao, 
-              thiết kế tinh tế và độ bền vượt trội. Mỗi sản phẩm đều được chế tác tỉ mỉ từ những loại gỗ quý hiếm, 
-              đảm bảo tính thẩm mỹ và giá trị sử dụng lâu dài.
-            </Text>
-            
-            <HStack spacing={6} mb={8} flexWrap="wrap">
-              <VStack align="flex-start" spacing={2} mb={{ base: 4, md: 0 }}>
-                <Text fontWeight="bold" fontSize="lg" color="brand.700">Chất lượng hàng đầu</Text>
-                <Text color="gray.600" fontSize="sm">Sản phẩm được làm từ gỗ tự nhiên 100%</Text>
-              </VStack>
+            <VStack align="flex-start" spacing={6} position="relative" zIndex={1}>
+              <Box>
+                <Text color="brand.600" fontWeight="bold" mb={2}>GIỚI THIỆU</Text>
+                <Heading as="h2" size="2xl" color="brand.800" mb={4}>
+                  Nội Thất Gỗ Tự Nhiên Cao Cấp
+                </Heading>
+                <Box h="4px" w="80px" bg="brand.500" mb={6}></Box>
+              </Box>
               
-              <VStack align="flex-start" spacing={2}>
-                <Text fontWeight="bold" fontSize="lg" color="brand.700">Bảo hành dài hạn</Text>
-                <Text color="gray.600" fontSize="sm">Bảo hành lên đến 5 năm cho tất cả sản phẩm</Text>
-              </VStack>
-            </HStack>
-            
-            <Button 
-              colorScheme="accent1" 
-              rightIcon={<FiChevronRight />}
-              _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: 'lg'
-              }}
-              transition="all 0.2s"
-            >
-              Xem thêm
-            </Button>
+              <Text color="brand.700" lineHeight="tall" fontSize="lg">
+                Với hơn 10 năm kinh nghiệm trong lĩnh vực sản xuất và thi công nội thất gỗ, chúng tôi tự hào mang đến những sản phẩm chất lượng cao, được chế tác tinh xảo từ những loại gỗ tự nhiên quý hiếm.
+              </Text>
+              
+              <HStack spacing={6} mb={8} flexWrap="wrap">
+                <VStack align="flex-start" spacing={2} mb={{ base: 4, md: 0 }}>
+                  <Text fontWeight="bold" fontSize="lg" color="brand.700">Chất lượng hàng đầu</Text>
+                  <Text color="brand.600" fontSize="sm">Sản phẩm được làm từ gỗ tự nhiên 100%</Text>
+                </VStack>
+                
+                <VStack align="flex-start" spacing={2}>
+                  <Text fontWeight="bold" fontSize="lg" color="brand.700">Bảo hành dài hạn</Text>
+                  <Text color="brand.600" fontSize="sm">Bảo hành lên đến 5 năm cho tất cả sản phẩm</Text>
+                </VStack>
+              </HStack>
+              
+              <Button 
+                rightIcon={<FiChevronRight />} 
+                bg="brand.600"
+                color="white"
+                size="lg"
+                _hover={{
+                  transform: 'translateX(5px)',
+                  bg: 'brand.700',
+                  boxShadow: 'md'
+                }}
+                transition="all 0.3s"
+              >
+                Xem thêm
+              </Button>
+            </VStack>
           </Box>
         </Flex>
       </Container>

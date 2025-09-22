@@ -10,18 +10,18 @@ const theme = {
     body: `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif`,
   },
   colors: {
-    // Màu chính - Bảng màu từ file HTML
+    // Màu chủ đạo - Bảng màu gỗ ấm áp
     brand: {
-      50: '#ffffff',     // Trắng tinh
-      100: '#f9f1e8',    // Nền chính - beige sáng, hơi ngả kem (--bg)
-      200: '#f3e5d8',    // Màu be nhạt
-      300: '#ede0d4',    // Màu viền - be rất nhạt (--border)
-      400: '#a1887f',    // Màu phụ - xám nâu (--muted)
-      500: '#8d6e63',    // Màu chữ phụ - nâu nhạt (--text-muted)
-      600: '#5d4037',    // Màu chữ chính - nâu gỗ đậm (--fg)
-      700: '#4e342e',    // Màu nâu đậm
-      800: '#3e2723',    // Màu nền topbar - nâu gỗ đậm (--topbar-bg)
-      900: '#2e1f1b',    // Màu nâu đen
+      50: '#fffaf5',     // Màu nền sáng nhất - kem nhạt
+      100: '#f8f1e8',    // Màu nền chính - màu gỗ sồi sáng
+      200: '#f0e4d8',    // Màu viền nhạt - gỗ sồi nhạt
+      300: '#e6d5c3',    // Màu viền - gỗ sồi trung bình
+      400: '#d4b999',    // Màu gỗ sồi ấm
+      500: '#c19a6b',    // Màu gỗ sồi vàng nâu
+      600: '#8b6b43',    // Màu gỗ sồi trung bình đậm
+      700: '#6b4e36',    // Màu gỗ sồi đậm
+      800: '#4e3629',    // Màu gỗ hạt dẻ đậm
+      900: '#362419',    // Màu gỗ óc chó đậm
     },
     // Màu nhấn chính - Xanh lá (--accent-1)
     accent1: {

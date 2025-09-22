@@ -19,7 +19,8 @@ const HeroSection = () => {
         left: 0,
         right: 0,
         bottom: 0,
-        bg: 'rgba(0,0,0,0.3)',
+        bg: 'rgba(0,0,0,0.2)',
+        background: 'linear-gradient(135deg, rgba(54,36,25,0.6) 0%, rgba(193,154,107,0.2) 100%)',
         zIndex: 1
       }}
     >

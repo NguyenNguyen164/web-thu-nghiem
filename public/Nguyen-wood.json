@@ -1,6 +1,5 @@
 {
   "meta": {
-    "source": "https://chocolatewood.com.au/",
     "created_at": "2025-09-19T02:48:15.433168Z",
     "updated_at": "2025-09-20T08:39:20.000000+07:00",
     "currency": "AUD",
@@ -43,9 +42,7 @@
           "diameter": 135,
           "height": 76.5
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/asti-pedestal-style-leg-round-dining-table-in-honey-wash"
-    },
+      }    },
     {
       "id": "prod_valentina_round_140",
       "title": "VALENTINA RECLAIMED ELMWOOD ROUND DINING TABLE 140CM",
@@ -60,9 +57,7 @@
           "diameter": 140,
           "height": 76
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/tables"
-    },
+      }    },
     {
       "id": "prod_jenalli_chair",
       "title": "JENALLI HAMPTONS RATTAN DINING CHAIR",
@@ -78,9 +73,7 @@
           "depth": 51,
           "height": 88
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/jenalli-hamptons-rattan-dining-chair-lounge-chair-in-smoked-greywash"
-    },
+      }    },
     {
       "id": "prod_belmont_chair",
       "title": "BELMONT GREY METAL CROSS BACK CHAIR",
@@ -96,9 +89,7 @@
           "depth": 46,
           "height": 89
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/dining-chairs"
-    },
+      }    },
     {
       "id": "prod_gotcha_3s",
       "title": "GOTCHA 3-SEATER CHESTERFIELD SOFA IN GREEN VELVET",
@@ -114,8 +105,7 @@
           "depth": 85,
           "height": 77
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/gotcha-3-seater-chesterfield-sofa-in-green-velvet"
+      }
     },
     {
       "id": "prod_koreen_3s",
@@ -132,9 +122,7 @@
           "depth": 62,
           "height": 86
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/sofa-s"
-    },
+      }    },
     {
       "id": "prod_hampton_tv_white",
       "title": "HAMPTON LOWLINE ENTERTAINMENT UNIT - WHITE",
@@ -150,9 +138,7 @@
           "depth": 45,
           "height": 45
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/hampton-lowline-television-entertainment-unit-tv-stand-4-drawers-white"
-    },
+      }    },
     {
       "id": "prod_stewart_tv",
       "title": "STEWART QUEEN ANN STYLE 180CM TV UNIT",
@@ -168,9 +154,7 @@
           "depth": 48,
           "height": 62
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/entertainment-units"
-    },
+      }    },
     {
       "id": "prod_pegasus_78",
       "title": "PEGASUS SOLID MAHOGANY 78 BOTTLE WINERACK",
@@ -186,9 +170,7 @@
           "depth": 35,
           "height": 110
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/pegasus-solid-mahogany-78-bottles-timber-winerack-mahogany"
-    },
+      }    },
     {
       "id": "prod_vespa_bar",
       "title": "VESPA SCOOTER BAR / WINE RACK",
@@ -204,9 +186,7 @@
           "depth": 50,
           "height": 180
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/wine-racks"
-    },
+      }    },
     {
       "id": "prod_orlia_queen",
       "title": "ORLIA SOLID MAHOGANY QUEEN SIZE 4 POSTER BED",
@@ -222,9 +202,7 @@
           "depth": 230,
           "height": 230
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/orlia-solid-mahogany-timber-queen-size-4-poster-bed-in-chocolate"
-    },
+      }    },
     {
       "id": "prod_granville_queen",
       "title": "GRANVILLE SOLID TASSIE OAK QUEEN SIZE BED",
@@ -240,9 +218,7 @@
           "depth": 220,
           "height": 120
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/beds"
-    },
+      }    },
     {
       "id": "prod_arielle_buffet",
       "title": "ARIELLE 2 DOOR BUFFET IN ANTIQUE GOLD",
@@ -258,9 +234,7 @@
           "depth": 50,
           "height": 86
         }
-      },
-      "product_url": "https://chocolatewood.com.au/products/arielle-buffet-antique-gold"
-    },
+      }    },
     {
       "id": "prod_brenda_sideboard",
       "title": "BRENDA SIDEBOARD 2 DOORS 3 DRAWERS + 2 BASKETS",
@@ -276,8 +250,6 @@
           "depth": 50,
           "height": 85
         }
-      },
-      "product_url": "https://chocolatewood.com.au/collections/buffets"
-    }
+      }    }
   ]
 }

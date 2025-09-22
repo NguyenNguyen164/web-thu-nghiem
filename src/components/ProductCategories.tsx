@@ -5,31 +5,31 @@ import { Link as RouterLink } from 'react-router-dom';
 const categories = [
   {
     id: 'cat_tables',
-    name: 'Bàn',
+    name: 'Bàn Ăn',
     image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     count: 4,
-    link: '/danh-muc/ban'
+    link: '/danh-muc/ban-an'
   },
   {
     id: 'cat_chairs',
-    name: 'Ghế',
+    name: 'Sofa & Ghế',
     image: 'https://images.unsplash.com/photo-1507207611509-ec012433ff52?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     count: 2,
-    link: '/danh-muc/ghe'
+    link: '/danh-muc/sofa-ghe'
   },
   {
     id: 'cat_sofas',
-    name: 'Sofa',
+    name: 'Tủ Quần Áo',
     image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     count: 4,
-    link: '/danh-muc/sofa'
+    link: '/danh-muc/tu-quan-ao'
   },
   {
     id: 'cat_tv_units',
-    name: 'Tủ tivi',
+    name: 'Giường Ngủ',
     image: 'https://images.unsplash.com/photo-1556228453-efd6d1f7f7c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80',
     count: 4,
-    link: '/danh-muc/tu-tivi'
+    link: '/danh-muc/giuong-ngu'
   },
 ];
 
