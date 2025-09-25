@@ -6,8 +6,32 @@ import type {
   ProductImages 
 } from '../types/product';
 
-// Base URL for API requests
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+// Base URL for API requests (without /api)
+const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || 'http://localhost:1337';
+
+// Add /api prefix to all API endpoints
+const API_PREFIX = '/api';
+
+// Prepare headers with authorization if token exists
+const getHeaders = () => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  if (import.meta.env.VITE_STRAPI_TOKEN) {
+    headers['Authorization'] = `Bearer ${import.meta.env.VITE_STRAPI_TOKEN}`;
+  }
+
+  return headers;
+};
+
+// Helper to ensure proper URL joining with API prefix
+const joinUrl = (base: string, path: string) => {
+  // Don't add /api if the URL already has it or is a full URL
+  const shouldAddApiPrefix = !path.startsWith('http') && !path.startsWith('/api');
+  const fullPath = shouldAddApiPrefix ? `${API_PREFIX}/${path}` : path;
+  return `${base.replace(/\/+$/, '')}/${fullPath.replace(/^\/+/, '')}`;
+};
 
 // Log environment for debugging
 console.log('API Base URL:', API_BASE_URL);
@@ -30,12 +54,20 @@ const apiRequest = async <T>(url: string, options: RequestInit = {}): Promise<T>
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    // Build the full URL and add API prefix if needed
+    const fullUrl = url.startsWith('http') ? url : joinUrl(API_BASE_URL, url);
+    
+    console.log('Making API request to:', fullUrl);
+    
+    // Merge default headers with any provided headers
+    const headers = {
+      ...getHeaders(),
+      ...(options.headers || {})
+    };
+    
+    const response = await fetch(fullUrl, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {

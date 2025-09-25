@@ -37,28 +37,6 @@ export async function listProducts(page = 1, pageSize = 12) {
   return handleResponse(res);
 }
 
-export async function listProductsByCategorySlug(slug: string, page = 1, pageSize = 12) {
-  const url = new URL(`${API}/api/products`);
-  
-  // Set filter by category slug
-  url.searchParams.set("filters[categories][slug][$eq]", slug);
-  
-  // Set fields
-  url.searchParams.set("fields[0]", "title");
-  url.searchParams.set("fields[1]", "slug");
-  url.searchParams.set("fields[2]", "price");
-  
-  // Set pagination
-  url.searchParams.set("pagination[page]", String(page));
-  url.searchParams.set("pagination[pageSize]", String(pageSize));
-  
-  // Set population
-  url.searchParams.set("populate[gallery][fields][0]", "url");
-  
-  const res = await fetch(url, { headers });
-  return handleResponse(res);
-}
-
 export async function getProductBySlug(slug: string) {
   const url = new URL(`${API}/api/products`);
   
