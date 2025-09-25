@@ -1,9 +1,10 @@
-import { ChakraProvider, Box, Container } from '@chakra-ui/react';
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { ChakraProvider, Box, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
+import { createBrowserRouter, RouterProvider, Navigate, useRouteError, isRouteErrorResponse } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './context/CartContext';
 import theme from './theme';
 import type { ReactNode } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Components
 import Header from './components/Header';
@@ -12,6 +13,7 @@ import Footer from './components/Footer';
 import ProductDetail from './pages/ProductDetail';
 import CategoryPage from './pages/CategoryPage';
 import HomePage from './pages/HomePage';
+import ProductsPage from './pages/ProductsPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
@@ -19,31 +21,42 @@ import SearchPage from './pages/SearchPage';
 import NotFound from './pages/NotFound';
 import { ScrollToTop, ScrollToTopButton } from './components/ScrollToTop';
 
-// Import the JSON data
-import productData from '../../product_descriptions.json';
-
-// Type definition for the product data
-interface ProductData {
-  items: Array<{
-    id: string;
-    title: string;
-    price_AUD: number;
-    compare_at_price_AUD?: number;
-    images: {
-      main: string;
-      thumb: string;
-      placeholder: string;
-    };
-    short_description?: string;
-    attributes?: Record<string, any>;
-    category_ids?: string[];
-  }>;
-}
-
-// Type assertion for the imported JSON data
-const typedProductData = productData as ProductData;
-
 const queryClient = new QueryClient();
+
+// Error boundary fallback component
+const ErrorFallback = () => {
+  const error = useRouteError();
+  
+  if (isRouteErrorResponse(error)) {
+    return (
+      <Box p={6} textAlign="center">
+        <Alert status="error" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" minH="200px">
+          <AlertIcon boxSize="40px" mr={0} />
+          <AlertTitle mt={4} mb={1} fontSize="lg">
+            {error.status} - {error.statusText || 'Có lỗi xảy ra'}
+          </AlertTitle>
+          <AlertDescription maxWidth="sm">
+            Không thể tải trang. Vui lòng thử lại sau.
+          </AlertDescription>
+        </Alert>
+      </Box>
+    );
+  }
+
+  return (
+    <Box p={6} textAlign="center">
+      <Alert status="error" variant="subtle" flexDirection="column" alignItems="center" justifyContent="center" textAlign="center" minH="200px">
+        <AlertIcon boxSize="40px" mr={0} />
+        <AlertTitle mt={4} mb={1} fontSize="lg">
+          Đã xảy ra lỗi
+        </AlertTitle>
+        <AlertDescription maxWidth="sm">
+          Vui lòng tải lại trang hoặc thử lại sau.
+        </AlertDescription>
+      </Alert>
+    </Box>
+  );
+};
 
 // Layout component that includes header and footer
 const Layout = ({ children, showScrollButton = false }: { children: ReactNode, showScrollButton?: boolean }) => (
@@ -61,48 +74,98 @@ const Layout = ({ children, showScrollButton = false }: { children: ReactNode, s
   </Box>
 );
 
-// Create the router configuration with v7 future flags
-const router = createBrowserRouter([
+// Create the router configuration with error boundaries for each route
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout><HomePage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/products',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout><ProductsPage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/san-pham/:id',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout><ProductDetail /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/danh-muc/:slug',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout showScrollButton={true}><CategoryPage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/gio-hang',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout><CartPage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/thanh-toan',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout><CheckoutPage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/dat-hang-thanh-cong',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout><OrderSuccessPage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/tim-kiem',
+      element: (
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Layout showScrollButton={true}><SearchPage /></Layout>
+        </ErrorBoundary>
+      ),
+      errorElement: <ErrorFallback />,
+    },
+    {
+      path: '/404',
+      element: <Layout><NotFound /></Layout>,
+    },
+    {
+      path: '*',
+      element: <Navigate to="/404" replace />
+    }
+  ],
   {
-    path: '/',
-    element: <Layout><HomePage /></Layout>,
-    errorElement: <Layout><NotFound /></Layout>,
-  },
-  {
-    path: '/san-pham/:id',
-    element: <Layout><ProductDetail /></Layout>,
-    errorElement: <Layout><NotFound /></Layout>,
-  },
-  {
-    path: '/danh-muc/:slug',
-    element: <Layout showScrollButton={true}><CategoryPage /></Layout>,
-  },
-  {
-    path: '/gio-hang',
-    element: <Layout><CartPage /></Layout>,
-  },
-  {
-    path: '/thanh-toan',
-    element: <Layout><CheckoutPage /></Layout>,
-  },
-  {
-    path: '/dat-hang-thanh-cong',
-    element: <Layout><OrderSuccessPage /></Layout>,
-  },
-  {
-    path: '/tim-kiem',
-    element: <Layout showScrollButton={true}><SearchPage /></Layout>,
-  },
-  {
-    path: '*',
-    element: <Navigate to="/404" replace />
+    basename: import.meta.env.PROD ? '/web-thu-nghiem' : '/',
+    future: {
+      // Future flags for React Router v7
+      // These will be used when upgrading to v7
+    }
   }
-], {
-  future: {
-    v7_startTransition: true,
-    v7_relativeSplatPath: true
-  }
-});
+);
 
 function App() {
   return (

@@ -1,5 +1,6 @@
 {
-  "name": "chocolate-wood-furniture",
+  "name": "Nguyen-furniture",
+  "homepage": "https://nguyennguyen164.github.io/web-thu-nghiem",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@chakra-ui/color-mode": "^2.2.0",
@@ -17,6 +20,7 @@
     "@emotion/styled": "^11.11.0",
     "@tanstack/react-query": "^5.89.0",
     "framer-motion": "^10.16.0",
+    "gh-pages": "^6.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.0",

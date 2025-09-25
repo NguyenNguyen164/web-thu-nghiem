@@ -233,7 +233,7 @@ const Footer = () => {
                   <FaEnvelope />
                 </Box>
                 <Text opacity={0.8}>
-                  <Link href="mailto:info@chocolatewood.com" _hover={{ color: hoverColor, textDecoration: 'none' }}>info@chocolatewood.com</Link>
+                  <Link href="mailto:info@nguyenfurniture.com" _hover={{ color: hoverColor, textDecoration: 'none' }}>info@nguyenfurniture.com</Link>
                 </Text>
               </HStack>
               

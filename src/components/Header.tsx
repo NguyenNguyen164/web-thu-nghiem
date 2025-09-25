@@ -1,4 +1,4 @@
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Box, 
   Container, 
@@ -7,53 +7,30 @@ import {
   IconButton, 
   Badge,
   HStack,
-  InputGroup,
-  InputLeftElement,
-  Input,
-  InputRightElement,
-  Kbd,
   useDisclosure,
-  useBreakpointValue,
-  Button
+  useBreakpointValue
 } from '@chakra-ui/react';
 import { FiShoppingCart, FiMenu, FiSearch, FiX } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
-import { useState, useEffect } from 'react';
-import type { KeyboardEvent } from 'react';
+import SearchBar from './common/SearchBar';
 
 const Header = () => {
   const { isOpen, onToggle } = useDisclosure();
   const { cart } = useCart();
-  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const cartItemsCount = cart.lines.reduce((total, item) => total + item.qty, 0);
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const location = useLocation();
+  const headerQuery = new URLSearchParams(location.search).get('q') || '';
 
-  // Handle search submission
-  const handleSearch = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/tim-kiem?q=${encodeURIComponent(searchQuery.trim())}`);
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      navigate(`/tim-kiem?q=${encodeURIComponent(query.trim())}`);
       if (isMobile) {
-        setSearchQuery('');
+        onToggle();
       }
     }
   };
-
-  // Handle keyboard navigation
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-
-  // Auto-focus search input on mobile when search is opened
-  useEffect(() => {
-    if (isOpen && isMobile) {
-      const searchInput = document.getElementById('search-input');
-      searchInput?.focus();
-    }
-  }, [isOpen, isMobile]);
 
   return (
     <Box as="header" bg="white" boxShadow="sm" position="sticky" top={0} zIndex={10}>
@@ -73,45 +50,28 @@ const Header = () => {
           {/* Search Bar - Desktop */}
           <Box 
             flex="1" 
-            maxW="2xl" 
             mx={4} 
             display={{ base: 'none', md: 'block' }}
           >
-            <form onSubmit={handleSearch}>
-              <InputGroup>
-                <InputLeftElement pointerEvents="none">
-                  <FiSearch color="gray.400" />
-                </InputLeftElement>
-                <Input
-                  placeholder="Tìm kiếm sản phẩm..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  bg="white"
-                  borderColor="gray.200"
-                  _hover={{ borderColor: 'gray.300' }}
-                  _focus={{
-                    borderColor: 'blue.500',
-                    boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
-                  }}
-                  pr="4.5rem"
-                />
-                <InputRightElement width="auto" mr={1}>
-                  <Kbd>Enter</Kbd>
-                </InputRightElement>
-              </InputGroup>
-            </form>
+            <SearchBar 
+              onSearch={handleSearch}
+              initialValue={headerQuery}
+              placeholder="Tìm kiếm sản phẩm..."
+              showButton={false}
+            />
           </Box>
 
           {/* Mobile Search Button */}
-          <IconButton
-            display={{ base: 'flex', md: 'none' }}
-            aria-label="Tìm kiếm"
-            icon={<FiSearch />}
-            onClick={onToggle}
-            variant="ghost"
-            mr={2}
-          />
+          {!isOpen && (
+            <IconButton
+              display={{ base: 'flex', md: 'none' }}
+              aria-label="Tìm kiếm"
+              icon={<FiSearch />}
+              onClick={onToggle}
+              variant="ghost"
+              mr={2}
+            />
+          )}
 
           {/* Right side icons */}
           <HStack spacing={4}>
@@ -119,54 +79,34 @@ const Header = () => {
             {isOpen && isMobile && (
               <Box
                 position="fixed"
-                top="0"
-                left="0"
-                right="0"
+                top={0}
+                left={0}
+                right={0}
+                bottom={0}
                 bg="white"
+                zIndex={9999}
                 p={4}
-                zIndex="overlay"
-                boxShadow="md"
                 display="flex"
                 alignItems="center"
               >
-                <form onSubmit={handleSearch} style={{ flex: 1 }}>
-                  <InputGroup>
-                    <InputLeftElement pointerEvents="none">
-                      <FiSearch color="gray.400" />
-                    </InputLeftElement>
-                    <Input
-                      id="search-input"
-                      placeholder="Tìm kiếm sản phẩm..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      bg="white"
-                      borderColor="gray.200"
-                      _hover={{ borderColor: 'gray.300' }}
-                      _focus={{
-                        borderColor: 'blue.500',
-                        boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
-                      }}
-                      pr="4.5rem"
-                    />
-                    <InputRightElement width="auto" mr={1}>
-                      <Button 
-                        size="sm" 
-                        colorScheme="blue" 
-                        h="1.75rem" 
-                        onClick={handleSearch}
-                      >
-                        Tìm
-                      </Button>
-                    </InputRightElement>
-                  </InputGroup>
-                </form>
+                <Box flex={1}>
+                  <SearchBar 
+                    onSearch={(query) => {
+                      handleSearch(query);
+                      onToggle();
+                    }}
+                    initialValue={headerQuery}
+                    placeholder="Tìm kiếm sản phẩm..."
+                    showButton={true}
+                    autoFocus
+                  />
+                </Box>
                 <IconButton
                   aria-label="Đóng tìm kiếm"
                   icon={<FiX />}
+                  variant="ghost"
                   onClick={onToggle}
                   ml={2}
-                  variant="ghost"
                 />
               </Box>
             )}

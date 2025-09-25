@@ -14,8 +14,8 @@ const HomePage = () => {
         <VStack spacing={20}>
           <ProductCategories />
           <ProductsByCategory />
-          <AboutSection />
           <FeaturesSection />
+          <AboutSection />
           <TestimonialsSection />
         </VStack>
       </Container>

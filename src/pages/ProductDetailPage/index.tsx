@@ -1,27 +1,41 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-  Box, Container, Heading, Text, Stack, HStack, Button, useToast, Spinner, Flex,
-  useBreakpointValue, IconButton, SimpleGrid, Divider, VStack, Badge, Image
+  Box, Container, Heading, Text, Stack, HStack, Button, useToast, 
+  Spinner, Flex, useBreakpointValue, IconButton, SimpleGrid, 
+  Divider, VStack, Badge, Image, Tabs, TabList, TabPanels, 
+  Tab, TabPanel, List, ListItem, ListIcon, useDisclosure,
+  Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, 
+  ModalCloseButton, Wrap, WrapItem, Tooltip, AspectRatio
 } from '@chakra-ui/react';
-import { FiArrowLeft, FiShoppingCart, FiHeart, FiShare2, FiArrowUp } from 'react-icons/fi';
+import { 
+  FiArrowLeft, FiShoppingCart, FiHeart, FiShare2, FiArrowUp,
+  FiCheck, FiTruck, FiShield, FiCreditCard, FiTag, FiInfo,
+  FiTruck as FiTruckIcon, FiCheckCircle, FiRefreshCw
+} from 'react-icons/fi';
 import { fetchProductById, fetchRelatedProducts } from '../../services/productService';
 import type { Product } from '../../types/product';
-import ProductGallery from '../../components/products/ProductGallery';
-import RelatedProducts from '../../components/products/RelatedProducts';
-import PriceTag from '../../components/ui/PriceTag';
-import QuantitySelector from '../../components/ui/QuantitySelector';
+import ProductCard from '../../components/ProductCard';
+
+// Price formatter helper
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', minimumFractionDigits: 0 }).format(price);
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const toast = useToast();
   const isMobile = useBreakpointValue({ base: true, md: false });
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedImage, setSelectedImage] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState(1);
 
   const loadProductData = useCallback(async () => {
     if (!id) {
@@ -62,34 +76,44 @@ export default function ProductDetailPage() {
     loadProductData();
   }, [loadProductData]);
 
-  const handleAddToCart = useCallback((productId: string) => {
-    toast({
-      title: 'Đã thêm vào giỏ hàng',
-      description: `Đã thêm ${quantity} sản phẩm vào giỏ hàng`,
-      status: 'success',
-      duration: 3000,
-      isClosable: true,
-    });
-    // TODO: Add to cart logic here
-  }, [quantity, toast]);
-
-  const handleShare = useCallback(() => {
-    if (navigator.share) {
-      navigator.share({
-        title: product?.title,
-        text: `Xem sản phẩm ${product?.title} tại Nguyen Furniture`,
-        url: window.location.href,
-      }).catch(console.error);
-    } else {
-      navigator.clipboard.writeText(window.location.href);
+  const handleAddToCart = async () => {
+    if (!product) return;
+    
+    setIsAddingToCart(true);
+    try {
+      // TODO: Implement add to cart logic
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
       toast({
-        title: 'Đã sao chép liên kết',
-        status: 'info',
-        duration: 2000,
+        title: 'Đã thêm vào giỏ hàng',
+        description: `${product.title} (x${quantity}) đã được thêm vào giỏ hàng`,
+        status: 'success',
+        duration: 3000,
         isClosable: true,
       });
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      toast({
+        title: 'Lỗi',
+        description: 'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsAddingToCart(false);
     }
-  }, [product, toast]);
+  };
+
+  const handleImageClick = (image: string) => {
+    setSelectedImage(image);
+    onOpen();
+  };
+
+  const productImages = product ? [
+    product.image || '/images/placeholder.jpg', 
+    ...(Array.isArray(product.images) ? product.images : [])
+  ].filter(Boolean) : [];
 
   if (isLoading) {
     return (
@@ -101,15 +125,11 @@ export default function ProductDetailPage() {
     );
   }
 
-  if (error || !product) {
+  if (error) {
     return (
       <Container maxW="container.xl" py={12} textAlign="center">
-        <Heading size="lg" mb={4} color="red.500">
-          {error || 'Không tìm thấy sản phẩm'}
-        </Heading>
-        <Text mb={6} color="gray.600">
-          {error ? 'Vui lòng thử lại sau.' : 'Xin lỗi, chúng tôi không thể tìm thấy sản phẩm bạn yêu cầu.'}
-        </Text>
+        <Heading size="lg" mb={4} color="red.500">Đã xảy ra lỗi</Heading>
+        <Text mb={6} color="gray.600">{error}</Text>
         <Button leftIcon={<FiArrowLeft />} colorScheme="blue" onClick={() => navigate(-1)}>
           Quay lại
         </Button>
@@ -117,171 +137,436 @@ export default function ProductDetailPage() {
     );
   }
 
-  const productImages = [product.image || '/placeholder-product.jpg', ...(product.images || [])].filter(Boolean) as string[];
+  if (!product) {
+    return (
+      <Container maxW="container.xl" py={12} textAlign="center">
+        <Heading size="lg" mb={4} color="gray.700">Không tìm thấy sản phẩm</Heading>
+        <Text mb={6} color="gray.600">Xin lỗi, chúng tôi không thể tìm thấy sản phẩm bạn yêu cầu.</Text>
+        <Button leftIcon={<FiArrowLeft />} colorScheme="blue" onClick={() => navigate('/')}>
+          Về trang chủ
+        </Button>
+      </Container>
+    );
+  }
+
+  const isOnSale = product.compare_at_price && product.compare_at_price > (product.price || 0);
+  const discountPercent = isOnSale && product.compare_at_price
+    ? Math.round(((product.compare_at_price - (product.price || 0)) / product.compare_at_price) * 100)
+    : 0;
 
   return (
     <Box bg="gray.50" minH="100vh">
       <Container maxW="container.xl" py={8}>
-        <Button leftIcon={<FiArrowLeft />} variant="ghost" mb={6} onClick={() => navigate(-1)}>
-          Quay lại
-        </Button>
+        {/* Breadcrumb */}
+        <HStack mb={6} spacing={2} fontSize="sm" color="gray.600">
+          <Button 
+            variant="link" 
+            colorScheme="blue" 
+            leftIcon={<FiArrowLeft />} 
+            onClick={() => navigate(-1)}
+            p={0}
+            height="auto"
+            _hover={{ textDecoration: 'underline' }}
+          >
+            Quay lại
+          </Button>
+          <Text>/</Text>
+          <Button 
+            variant="link" 
+            colorScheme="blue" 
+            onClick={() => navigate('/')}
+            p={0}
+            height="auto"
+            _hover={{ textDecoration: 'underline' }}
+          >
+            Trang chủ
+          </Button>
+          <Text>/</Text>
+          {product.categories?.[0] && (
+            <Button 
+              variant="link" 
+              colorScheme="blue" 
+              onClick={() => navigate(`/danh-muc/${product.categories?.[0]}`)}
+              p={0}
+              height="auto"
+              _hover={{ textDecoration: 'underline' }}
+            >
+              {product.categories?.[0]}
+            </Button>
+          )}
+          <Text>/</Text>
+          <Text fontWeight="medium">{product.title}</Text>
+        </HStack>
 
-        <Box bg="white" borderRadius="xl" overflow="hidden" boxShadow="sm" mb={8}>
-          <Stack direction={{ base: 'column', lg: 'row' }} spacing={8} p={{ base: 4, md: 8 }}>
+        {/* Product Main Section */}
+        <Box bg="white" borderRadius="lg" shadow="sm" p={{ base: 4, md: 6 }} mb={8}>
+          <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={8}>
             {/* Product Images */}
-            <Box flex={1}>
-              <ProductGallery images={productImages} title={product.title} />
+            <Box>
+              <AspectRatio ratio={1} maxW="100%" borderRadius="md" overflow="hidden" mb={4}>
+                <Image 
+                  src={productImages[currentImageIndex] || '/images/placeholder.jpg'}
+                  alt={product.title}
+                  objectFit="cover"
+                  w="100%"
+                  h="100%"
+                  cursor="pointer"
+                  onClick={() => handleImageClick(productImages[currentImageIndex])}
+                />
+              </AspectRatio>
+              
+              {/* Thumbnails */}
+              {productImages.length > 1 && (
+                <HStack spacing={2} overflowX="auto" py={2}>
+                  {productImages.map((img, index) => (
+                    <Box
+                      key={index}
+                      w="60px"
+                      h="60px"
+                      borderRadius="md"
+                      overflow="hidden"
+                      borderWidth={currentImageIndex === index ? '2px' : '1px'}
+                      borderColor={currentImageIndex === index ? 'blue.500' : 'gray.200'}
+                      cursor="pointer"
+                      flexShrink={0}
+                      onClick={() => setCurrentImageIndex(index)}
+                      _hover={{ borderColor: 'blue.300' }}
+                    >
+                      <Image 
+                        src={img} 
+                        alt={`${product.title} ${index + 1}`}
+                        w="100%"
+                        h="100%"
+                        objectFit="cover"
+                      />
+                    </Box>
+                  ))}
+                </HStack>
+              )}
+              
+              {/* Share and Wishlist */}
+              <HStack mt={4} spacing={4} color="gray.600">
+                <Button 
+                  leftIcon={<FiShare2 />} 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast({
+                      title: 'Đã sao chép liên kết',
+                      status: 'success',
+                      duration: 2000,
+                      isClosable: true,
+                    });
+                  }}
+                >
+                  Chia sẻ
+                </Button>
+                <Button leftIcon={<FiHeart />} variant="outline" size="sm">
+                  Yêu thích
+                </Button>
+              </HStack>
             </Box>
 
             {/* Product Info */}
-            <Box flex={1} pl={{ lg: 4 }}>
-              <Heading as="h1" size="xl" mb={4} color="gray.800" fontWeight="semibold">
-                {product.title}
-              </Heading>
-
-              <HStack spacing={4} mb={6}>
-                {product.attributes?.material && (
-                  <HStack>
-                    <Text color="gray.600" fontWeight="medium">Chất liệu:</Text>
-                    <Text color="gray.700">{product.attributes.material}</Text>
-                  </HStack>
+            <Box>
+              <Box mb={4}>
+                {isOnSale && (
+                  <Badge colorScheme="red" px={2} py={1} borderRadius="md" mb={2}>
+                    Giảm {discountPercent}%
+                  </Badge>
                 )}
-                {product.attributes?.color && (
-                  <HStack>
-                    <Text color="gray.600" fontWeight="medium">Màu sắc:</Text>
-                    <Text color="gray.700">{product.attributes.color}</Text>
-                  </HStack>
-                )}
-              </HStack>
-
-              <Box mb={8}>
-                <PriceTag 
-                  price={product.price} 
-                  compareAtPrice={product.compare_at_price} 
-                  size="lg" 
-                />
-                <Text color="green.600" mt={1} fontSize="sm">
-                  <Text as="span" fontWeight="medium">Tình trạng:</Text> Còn hàng
-                </Text>
-              </Box>
-
-              <Stack direction={{ base: 'column', sm: 'row' }} spacing={4} mb={8}>
-                <Box>
-                  <Text fontWeight="medium" mb={2} color="gray.600">
-                    Số lượng
-                  </Text>
-                  <QuantitySelector
-                    value={quantity}
-                    onChange={setQuantity}
-                    min={1}
-                    max={product.stock || 99}
-                  />
-                </Box>
-              </Stack>
-
-              <Stack direction={{ base: 'column', sm: 'row' }} spacing={4} mb={8}>
-                <Button
-                  colorScheme="blue"
-                  size="lg"
-                  leftIcon={<FiShoppingCart />}
-                  onClick={() => handleAddToCart(product.id)}
-                  flex={1}
-                  py={6}
-                  borderRadius="md"
-                  _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
-                  transition="all 0.2s"
-                >
-                  Thêm vào giỏ hàng
-                </Button>
-
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  leftIcon={<FiHeart />} 
-                  flex={1} 
-                  py={6} 
-                  borderRadius="md" 
-                  _hover={{ bg: 'gray.50' }}
-                >
-                  Yêu thích
-                </Button>
-
-                <IconButton 
-                  aria-label="Chia sẻ" 
-                  icon={<FiShare2 />} 
-                  size="lg" 
-                  variant="outline" 
-                  onClick={handleShare} 
-                />
-              </Stack>
-
-              {/* Product Description */}
-              <Box mb={8}>
-                <Heading size="md" mb={4} color="gray.800" borderBottom="1px" borderColor="gray.200" pb={2}>
-                  Mô tả sản phẩm
+                <Heading as="h1" size="xl" mb={2} color="gray.800">
+                  {product.title}
                 </Heading>
-                {product.description ? (
-                  <Text color="gray.700" lineHeight="tall" whiteSpace="pre-line">
-                    {product.description}
+                <Text color="gray.500" fontSize="sm" mb={4}>
+                  Mã sản phẩm: {product.id}
+                </Text>
+                
+                <Box bg="blue.50" p={4} borderRadius="md" mb={4}>
+                  <Text fontSize="xl" color="red.600" fontWeight="bold" mb={1}>
+                    {formatPrice(product.price || 0)}
                   </Text>
-                ) : (
-                  <Text color="gray.500">Đang cập nhật mô tả sản phẩm...</Text>
-                )}
-              </Box>
-
-              {/* Product Specifications */}
-              {product.attributes && (
-                <Box mb={8}>
-                  <Heading size="md" mb={4} color="gray.800" borderBottom="1px" borderColor="gray.200" pb={2}>
-                    Thông số kỹ thuật
-                  </Heading>
-                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-                    {product.attributes.material && (
-                      <Box>
-                        <Text fontWeight="medium" color="gray.600">Chất liệu</Text>
-                        <Text color="gray.800">{product.attributes.material}</Text>
-                      </Box>
-                    )}
-                    {product.attributes.color && (
-                      <Box>
-                        <Text fontWeight="medium" color="gray.600">Màu sắc</Text>
-                        <Text color="gray.800">{product.attributes.color}</Text>
-                      </Box>
-                    )}
-                    {product.attributes.dimensions_cm && (
-                      <Box>
-                        <Text fontWeight="medium" color="gray.600">Kích thước (cm)</Text>
-                        {Object.entries(product.attributes.dimensions_cm).map(([key, value]) => (
-                          <Text key={key} color="gray.800" fontSize="sm">
-                            {key.replace(/_/g, ' ')}: {value} cm
-                          </Text>
-                        ))}
-                      </Box>
-                    )}
-                  </SimpleGrid>
+                  {isOnSale && (
+                    <Text as="s" color="gray.500" fontSize="sm">
+                      {formatPrice(product.compare_at_price || 0)}
+                    </Text>
+                  )}
+                  {product.attributes?.in_stock ? (
+                    <HStack color="green.600" mt={1}>
+                      <FiCheckCircle />
+                      <Text fontSize="sm" fontWeight="500">Còn hàng</Text>
+                    </HStack>
+                  ) : (
+                    <HStack color="red.500" mt={1}>
+                      <FiInfo />
+                      <Text fontSize="sm" fontWeight="500">Tạm hết hàng</Text>
+                    </HStack>
+                  )}
                 </Box>
-              )}
+                
+                <Text color="gray.700" mb={6} whiteSpace="pre-line">
+                  {product.short_description || product.description || 'Không có mô tả chi tiết.'}
+                </Text>
+                
+                {/* Quantity Selector */}
+                <HStack mb={6}>
+                  <Text fontWeight="medium">Số lượng:</Text>
+                  <HStack borderWidth="1px" borderRadius="md" px={2}>
+                    <IconButton 
+                      aria-label="Giảm số lượng"
+                      icon={<Text>-</Text>} 
+                      size="sm"
+                      variant="ghost"
+                      isDisabled={quantity <= 1}
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    />
+                    <Text w="40px" textAlign="center">{quantity}</Text>
+                    <IconButton 
+                      aria-label="Tăng số lượng"
+                      icon={<Text>+</Text>} 
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setQuantity(quantity + 1)}
+                    />
+                  </HStack>
+                  <Text color="gray.500" fontSize="sm">
+                    {product.attributes?.in_stock ? `${product.attributes.in_stock} sản phẩm có sẵn` : ''}
+                  </Text>
+                </HStack>
+                
+                {/* Action Buttons */}
+                <Stack direction={{ base: 'column', sm: 'row' }} spacing={4} mb={6}>
+                  <Button 
+                    colorScheme="blue" 
+                    size="lg" 
+                    leftIcon={<FiShoppingCart />}
+                    onClick={handleAddToCart}
+                    isLoading={isAddingToCart}
+                    loadingText="Đang thêm..."
+                    isDisabled={!product.attributes?.in_stock}
+                    flex={1}
+                  >
+                    Thêm vào giỏ hàng
+                  </Button>
+                  <Button 
+                    colorScheme="green" 
+                    size="lg"
+                    variant="outline"
+                    flex={1}
+                    isDisabled={!product.attributes?.in_stock}
+                  >
+                    Mua ngay
+                  </Button>
+                </Stack>
+                
+                {/* Highlights */}
+                <Box borderWidth="1px" borderRadius="md" p={4} mb={6}>
+                  <List spacing={2}>
+                    <ListItem>
+                      <HStack>
+                        <ListIcon as={FiTruck} color="green.500" />
+                        <Text>Miễn phí vận chuyển cho đơn hàng từ 5.000.000đ</Text>
+                      </HStack>
+                    </ListItem>
+                    <ListItem>
+                      <HStack>
+                        <ListIcon as={FiShield} color="green.500" />
+                        <Text>Bảo hành chính hãng 12 tháng</Text>
+                      </HStack>
+                    </ListItem>
+                    <ListItem>
+                      <HStack>
+                        <ListIcon as={FiCreditCard} color="green.500" />
+                        <Text>Thanh toán khi nhận hàng hoặc trả góp 0%</Text>
+                      </HStack>
+                    </ListItem>
+                  </List>
+                </Box>
+              </Box>
+              
+              {/* Categories and Tags */}
+              <Box borderTopWidth="1px" pt={4}>
+                <HStack spacing={4}>
+                  <Box>
+                    <Text fontSize="sm" color="gray.500" mb={1}>Danh mục:</Text>
+                    <Wrap>
+                      {product.categories?.map((cat, index) => (
+                        <WrapItem key={index}>
+                          <Button 
+                            size="xs" 
+                            variant="outline" 
+                            rightIcon={<FiArrowUp style={{ transform: 'rotate(45deg)' }} />}
+                            onClick={() => navigate(`/danh-muc/${cat}`)}
+                          >
+                            {cat}
+                          </Button>
+                        </WrapItem>
+                      )) || <Text fontSize="sm">Không có danh mục</Text>}
+                    </Wrap>
+                  </Box>
+                </HStack>
+              </Box>
             </Box>
-          </Stack>
+          </SimpleGrid>
         </Box>
-
+        
+        {/* Product Tabs */}
+        <Box bg="white" borderRadius="lg" shadow="sm" p={{ base: 4, md: 6 }} mb={8}>
+          <Tabs variant="enclosed">
+            <TabList>
+              <Tab _selected={{ color: 'blue.500', borderBottom: '2px solid', borderColor: 'blue.500' }}>
+                Mô tả sản phẩm
+              </Tab>
+              <Tab _selected={{ color: 'blue.500', borderBottom: '2px solid', borderColor: 'blue.500' }}>
+                Thông số kỹ thuật
+              </Tab>
+              <Tab _selected={{ color: 'blue.500', borderBottom: '2px solid', borderColor: 'blue.500' }}>
+                Chính sách bảo hành
+              </Tab>
+            </TabList>
+            
+            <TabPanels mt={4}>
+              <TabPanel px={0}>
+                <Box dangerouslySetInnerHTML={{ __html: product.description || 'Không có mô tả chi tiết.' }} />
+              </TabPanel>
+              <TabPanel px={0}>
+                {product.attributes ? (
+                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                    {Object.entries(product.attributes).map(([key, value]) => (
+                      <Box key={key}>
+                        <Text fontWeight="medium" color="gray.700">
+                          {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                        </Text>
+                        <Text color="gray.600">{String(value) || 'Không có thông tin'}</Text>
+                      </Box>
+                    ))}
+                  </SimpleGrid>
+                ) : (
+                  <Text>Không có thông số kỹ thuật.</Text>
+                )}
+              </TabPanel>
+              <TabPanel px={0}>
+                <VStack align="stretch" spacing={4}>
+                  <Box>
+                    <HStack color="blue.600" mb={2}>
+                      <FiShield />
+                      <Heading size="md">Chính sách bảo hành</Heading>
+                    </HStack>
+                    <List spacing={2}>
+                      <ListItem>
+                        <HStack align="flex-start">
+                          <ListIcon as={FiCheck} color="green.500" mt={1} />
+                          <Text>Bảo hành chính hãng 12 tháng</Text>
+                        </HStack>
+                      </ListItem>
+                      <ListItem>
+                        <HStack align="flex-start">
+                          <ListIcon as={FiCheck} color="green.500" mt={1} />
+                          <Text>Hỗ trợ kỹ thuật trọn đời sản phẩm</Text>
+                        </HStack>
+                      </ListItem>
+                      <ListItem>
+                        <HStack align="flex-start">
+                          <ListIcon as={FiCheck} color="green.500" mt={1} />
+                          <Text>Đổi trả trong vòng 7 ngày nếu có lỗi từ nhà sản xuất</Text>
+                        </HStack>
+                      </ListItem>
+                    </List>
+                  </Box>
+                  
+                  <Divider my={2} />
+                  
+                  <Box>
+                    <HStack color="blue.600" mb={2}>
+                      <FiTruckIcon />
+                      <Heading size="md">Chính sách giao hàng</Heading>
+                    </HStack>
+                    <List spacing={2}>
+                      <ListItem>
+                        <HStack align="flex-start">
+                          <ListIcon as={FiCheck} color="green.500" mt={1} />
+                          <Text>Miễn phí vận chuyển cho đơn hàng từ 5.000.000đ</Text>
+                        </HStack>
+                      </ListItem>
+                      <ListItem>
+                        <HStack align="flex-start">
+                          <ListIcon as={FiCheck} color="green.500" mt={1} />
+                          <Text>Giao hàng toàn quốc</Text>
+                        </HStack>
+                      </ListItem>
+                      <ListItem>
+                        <HStack align="flex-start">
+                          <ListIcon as={FiCheck} color="green.500" mt={1} />
+                          <Text>Nhận hàng và thanh toán tại nhà</Text>
+                        </HStack>
+                      </ListItem>
+                    </List>
+                  </Box>
+                </VStack>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Box>
+        
         {/* Related Products */}
-        <RelatedProducts 
-          products={relatedProducts} 
-          onAddToCart={handleAddToCart} 
-        />
-
-        {/* Back to Top Button */}
-        <Box textAlign="center" mt={8} mb={4}>
+        {relatedProducts.length > 0 && (
+          <Box mb={8}>
+            <Heading size="lg" mb={6} color="gray.800">Sản phẩm liên quan</Heading>
+            <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={6}>
+              {relatedProducts.map((item) => (
+                <ProductCard 
+                  key={item.id} 
+                  product={item} 
+                  onAddToCart={(e) => {
+                    e.preventDefault();
+                    // Handle add to cart
+                  }}
+                />
+              ))}
+            </SimpleGrid>
+          </Box>
+        )}
+      </Container>
+      
+      {/* Image Preview Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} size="4xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>{product.title}</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody p={0}>
+            <Image 
+              src={selectedImage} 
+              alt={product.title}
+              w="100%"
+              maxH="80vh"
+              objectFit="contain"
+            />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      
+      {/* Back to top button */}
+      <Box 
+        position="fixed" 
+        bottom="40px" 
+        right="40px" 
+        zIndex={10}
+        display={{ base: 'none', md: 'block' }}
+      >
+        <Tooltip label="Lên đầu trang" placement="left">
           <Button 
-            variant="ghost" 
-            leftIcon={<FiArrowUp />} 
+            colorScheme="blue" 
+            size="lg" 
+            isRound 
+            boxShadow="lg"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           >
-            Lên đầu trang
+            <FiArrowUp />
           </Button>
-        </Box>
-      </Container>
+        </Tooltip>
+      </Box>
     </Box>
   );
 }

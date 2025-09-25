@@ -127,8 +127,41 @@ export default function ProductDetail() {
     );
   }
 
-  const productImages = [product.image || '/placeholder-product.jpg', ...(product.images || [])].filter(Boolean) as string[];
+  // Get all possible image sources in priority order
+  const getProductImages = (product: Product): string[] => {
+    // Start with an empty array
+    const images: string[] = [];
 
+    // Add main product image if exists
+    if (product.image) {
+      images.push(product.image);
+    }
+
+    // Add gallery images if they exist
+    if (Array.isArray(product.galleryImages) && product.galleryImages.length > 0) {
+      images.push(...product.galleryImages.filter(Boolean));
+    }
+    // Handle different image formats
+    else if (product.images) {
+      if (Array.isArray(product.images)) {
+        images.push(...product.images.filter(Boolean));
+      } else if (typeof product.images === 'object') {
+        // Handle object format images
+        const { main, thumb, placeholder } = product.images as { main?: string; thumb?: string; placeholder?: string };
+        if (main) images.push(main);
+        if (thumb && !images.includes(thumb)) images.push(thumb);
+        if (placeholder && !images.includes(placeholder)) images.push(placeholder);
+      }
+    }
+
+    // Filter out any empty strings or invalid URLs and ensure uniqueness
+    const uniqueImages = Array.from(new Set(images.filter(Boolean)));
+
+    // Always ensure we have at least a placeholder
+    return uniqueImages.length > 0 ? uniqueImages : ['/placeholder-product.jpg'];
+  };
+
+  const productImages = getProductImages(product);
   console.log('Product images:', productImages);
 
   return (
