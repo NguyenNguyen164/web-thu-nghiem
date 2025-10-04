@@ -1,117 +1,187 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { add, mul, zero } from "../utils/money";
-import type { Cart, CartLine, Price } from "../types/cart";
+// src/context/CartContext.tsx
+import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import type { ReactNode } from 'react';
 
-type CartContextValue = {
-  cart: Cart;
-  addItem: (line: Omit<CartLine, "id">) => void;
-  removeItem: (lineId: string) => void;
-  updateQty: (lineId: string, qty: number) => void;
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+  sku?: string;
+}
+
+interface CartState {
+  items: CartItem[];
+  total: number;
+  itemCount: number;
+}
+
+type CartAction =
+  | { type: 'ADD_ITEM'; payload: Omit<CartItem, 'quantity'> }
+  | { type: 'REMOVE_ITEM'; payload: string }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
+  | { type: 'CLEAR_CART' }
+
+interface CartContextType {
+  // Cart state
+  items: CartItem[];
+  total: number;
+  itemCount: number;
+  
+  // Cart actions
+  addToCart: (item: Omit<CartItem, 'quantity'>) => void;
+  removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  updateQty: (id: string, quantity: number) => void;
+  removeItem: (id: string) => void;
+  clearCart: () => void;
   clear: () => void;
-  setCurrency: (c: Price["currency"]) => void;
-};
-
-const CartContext = createContext<CartContextValue | null>(null);
-const LS_KEY = "cw_cart_v1";
-
-function compute(cartLines: CartLine[], currency: Price["currency"]): Cart {
-  const subtotal = cartLines.reduce((acc, l) => acc + l.unitPrice.amount * l.qty, 0);
-  // Free shipping if subtotal >= 1000, otherwise $49
-  const shippingAmt = subtotal === 0 ? 0 : subtotal >= 1000 ? 0 : 49;
-  // 10% tax
-  const taxAmt = subtotal * 0.1;
-  const totalAmt = subtotal + shippingAmt + taxAmt;
-
-  const toPrice = (amount: number) => ({ amount: +amount.toFixed(2), currency });
-
-  return {
-    lines: cartLines,
-    subtotal: toPrice(subtotal),
-    shipping: toPrice(shippingAmt),
-    tax: toPrice(taxAmt),
-    total: toPrice(totalAmt),
+  isInCart: (id: string) => boolean;
+  
+  // Cart data in the format expected by CartPage
+  cart: {
+    lines: Array<{
+      id: string;
+      name: string;
+      unitPrice: { amount: number };
+      qty: number;
+      image?: string;
+    }>;
+    total: number;
+    itemCount: number;
   };
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [currency, setCurrencyState] = useState<Price["currency"]>("AUD");
-  const [lines, setLines] = useState<CartLine[]>([]);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
-  // Load from localStorage
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as { lines: CartLine[]; currency: Price["currency"] };
-        setLines(parsed.lines || []);
-        setCurrencyState(parsed.currency || "AUD");
+const cartReducer = (state: CartState, action: CartAction): CartState => {
+  switch (action.type) {
+    case 'ADD_ITEM': {
+      const existingItem = state.items.find(item => item.id === action.payload.id);
+      if (existingItem) {
+        return {
+          ...state,
+          items: state.items.map(item =>
+            item.id === action.payload.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          ),
+          total: state.total + action.payload.price,
+          itemCount: state.itemCount + 1,
+        };
       }
-    } catch (e) {
-      console.error("Failed to load cart from localStorage", e);
+      return {
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }],
+        total: state.total + action.payload.price,
+        itemCount: state.itemCount + 1,
+      };
     }
+    case 'REMOVE_ITEM': {
+      const itemToRemove = state.items.find(item => item.id === action.payload);
+      if (!itemToRemove) return state;
+      
+      return {
+        ...state,
+        items: state.items.filter(item => item.id !== action.payload),
+        total: state.total - (itemToRemove.price * itemToRemove.quantity),
+        itemCount: state.itemCount - itemToRemove.quantity,
+      };
+    }
+    case 'UPDATE_QUANTITY': {
+      const itemToUpdate = state.items.find(item => item.id === action.payload.id);
+      if (!itemToUpdate) return state;
+
+      const quantityDiff = action.payload.quantity - itemToUpdate.quantity;
+      
+      return {
+        ...state,
+        items: state.items.map(item =>
+          item.id === action.payload.id
+            ? { ...item, quantity: action.payload.quantity }
+            : item
+        ),
+        total: state.total + (itemToUpdate.price * quantityDiff),
+        itemCount: state.itemCount + quantityDiff,
+      };
+    }
+    case 'CLEAR_CART':
+      return { items: [], total: 0, itemCount: 0 };
+    default:
+      return state;
+  }
+};
+
+export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [state, dispatch] = useReducer(cartReducer, {
+    items: [],
+    total: 0,
+    itemCount: 0,
+  });
+
+  const addToCart = useCallback((item: Omit<CartItem, 'quantity'>) => {
+    dispatch({ type: 'ADD_ITEM', payload: item });
   }, []);
 
-  // Persist to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify({ lines, currency }));
-    } catch (e) {
-      console.error("Failed to save cart to localStorage", e);
-    }
-  }, [lines, currency]);
+  const removeFromCart = useCallback((id: string) => {
+    dispatch({ type: 'REMOVE_ITEM', payload: id });
+  }, []);
 
-  const cart = useMemo(() => compute(lines, currency), [lines, currency]);
+  const removeItem = removeFromCart;
 
-  const addItem: CartContextValue["addItem"] = (line) => {
-    setLines((prev) => {
-      // Group by SKU + unitPrice
-      const found = prev.find(
-        (x) => x.sku === line.sku && x.unitPrice.amount === line.unitPrice.amount
-      );
-      if (found) {
-        return prev.map((x) =>
-          x.sku === line.sku && x.unitPrice.amount === line.unitPrice.amount
-            ? { ...x, qty: x.qty + line.qty }
-            : x
-        );
-      }
-      const id = crypto.randomUUID();
-      return [...prev, { ...line, id }];
-    });
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
+  }, []);
+
+  const updateQty = updateQuantity;
+
+  const clearCart = useCallback(() => {
+    dispatch({ type: 'CLEAR_CART' });
+  }, []);
+
+  const clear = clearCart;
+
+  const isInCart = useCallback((id: string) => {
+    return state.items.some(item => item.id === id);
+  }, [state.items]);
+
+    const cart = {
+    lines: state.items.map(item => ({
+      id: item.id,
+      name: item.name,
+      unitPrice: { amount: item.price },
+      qty: item.quantity,
+      image: item.image
+    })),
+    total: state.total,
+    itemCount: state.itemCount
   };
 
-  const removeItem = (lineId: string) =>
-    setLines((prev) => prev.filter((l) => l.id !== lineId));
-    
-  const updateQty = (lineId: string, qty: number) =>
-    setLines((prev) =>
-      prev.map((l) => (l.id === lineId ? { ...l, qty: Math.max(1, qty) } : l))
-    );
-    
-  const clear = () => setLines([]);
-  const setCurrency = (c: Price["currency"]) => setCurrencyState(c);
-
-  const value = useMemo(
-    () => ({
-      cart,
-      addItem,
-      removeItem,
-      updateQty,
-      clear,
-      setCurrency,
-    }),
-    [cart]
-  );
+  const contextValue: CartContextType = {
+    ...state,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    updateQty,
+    removeItem,
+    clearCart,
+    clear,
+    isInCart,
+    cart
+  };
 
   return (
-    <CartContext.Provider value={value}>
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
-}
+};
 
-export const useCart = () => {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used within CartProvider");
-  return ctx;
+export const useCart = (): CartContextType => {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
 };
